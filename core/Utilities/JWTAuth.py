@@ -48,14 +48,11 @@ def get_current_user(token: str):
     return get_object_or_404(get_user_model(), id=token_data.id)
 
 
-class AuthBearer(TokenAuthentication):
+class JWTAuthenticationScheme(TokenAuthentication):
+    keyword = 'Bearer'
+
     def authenticate_credentials(self, key):
-        try:
-            user = get_user_model().objects.get(auth_token=key)
-        except get_user_model().DoesNotExist:
+        user = get_current_user(key)
+        if user is None:
             raise AuthenticationFailed('Invalid token.')
-
-        if not user.is_active:
-            raise AuthenticationFailed('User inactive or deleted.')
-
         return (user, key)

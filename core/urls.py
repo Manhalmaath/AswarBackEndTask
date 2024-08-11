@@ -1,18 +1,41 @@
 from django.urls import path
 from drf_yasg import openapi
+from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
-from core.views.user_management import UserView
+from core.Utilities.JWTAuth import JWTAuthenticationScheme
+from core.views.credential_management import list_credentials, create_credential, update_credential, \
+    grant_access
+from core.views.service import service_list_create, service_detail
+from core.views.tags import tag_list_create, tag_detail
+from core.views.user_management import register, login
+
+
+class BearerTokenSchemaGenerator(OpenAPISchemaGenerator):
+    def get_schema(self, request=None, public=False):
+        schema = super().get_schema(request, public)
+        schema.security_definitions = {
+            'Bearer': {
+                'type': 'apiKey',
+                'name': 'Authorization',
+                'in': 'header'
+            }
+        }
+        schema.security = [{'Bearer': []}]
+        return schema
+
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Snippets API",
+        title="API Documentation",
         default_version='v1',
-        description="Test description",
+        description="API documentation with JWT authentication",
     ),
     public=True,
-    permission_classes=(permissions.AllowAny,),
+    permission_classes=[permissions.AllowAny,],
+    authentication_classes=[JWTAuthenticationScheme],
+    generator_class=BearerTokenSchemaGenerator,
 )
 
 urlpatterns = [
@@ -20,5 +43,19 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
-    path('register/', UserView.as_view(), {'action': ['post']}),
+    path('register/', register, name='register'),
+    path('login/', login, name='login'),
+
+    path('credentials/', list_credentials, name='list-credentials'),
+    path('credentials/create/', create_credential, name='create-credential'),
+    path('credentials/<int:pk>/update/', update_credential, name='update-credential'),
+    path('credentials/<int:pk>/grant-access/', grant_access, name='grant-access'),
+
+
+    path('services/', service_list_create, name='service-list-create'),
+    path('services/<int:pk>/', service_detail, name='service-detail'),
+    path('tags/', tag_list_create, name='tag-list-create'),
+    path('tags/<int:pk>/', tag_detail, name='tag-detail'),
+
+
 ]
