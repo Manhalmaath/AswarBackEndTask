@@ -7,8 +7,8 @@ from rest_framework import permissions
 from core.Utilities.JWTAuth import JWTAuthenticationScheme
 from core.views.credential_management import list_credentials, create_credential, update_credential, \
     grant_access
-from core.views.service import service_list_create, service_detail
-from core.views.tags import tag_list_create, tag_detail
+from core.views.service import ServiceViewSet
+from core.views.tags import TagViewSet, SingleTagViewSet
 from core.views.user_management import register, login
 
 
@@ -33,7 +33,7 @@ schema_view = get_schema_view(
         description="API documentation with JWT authentication",
     ),
     public=True,
-    permission_classes=[permissions.AllowAny,],
+    permission_classes=[permissions.AllowAny, ],
     authentication_classes=[JWTAuthenticationScheme],
     generator_class=BearerTokenSchemaGenerator,
 )
@@ -51,11 +51,11 @@ urlpatterns = [
     path('credentials/<int:pk>/update/', update_credential, name='update-credential'),
     path('credentials/<int:pk>/grant-access/', grant_access, name='grant-access'),
 
+    path('services/', ServiceViewSet.as_view(), name='service-list-create'),
+    path('services/<int:pk>/', SingleTagViewSet.as_view(), name='service-detail'),
 
-    path('services/', service_list_create, name='service-list-create'),
-    path('services/<int:pk>/', service_detail, name='service-detail'),
-    path('tags/', tag_list_create, name='tag-list-create'),
-    path('tags/<int:pk>/', tag_detail, name='tag-detail'),
+    path('tags/', TagViewSet.as_view(), name='tag-list-create'),
 
+    path('tags/<int:pk>/', SingleTagViewSet.as_view(), name='tag-detail'),
 
 ]

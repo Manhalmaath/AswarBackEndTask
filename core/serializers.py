@@ -37,6 +37,18 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        exclude = ['created_by']
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        exclude = ['created_by']
+
+
 class CredentialSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -68,15 +80,3 @@ class CredentialSerializer(serializers.ModelSerializer):
         decrypted_password = cipher_suite.decrypt(instance.password.encode()).decode()
         representation['password'] = decrypted_password
         return representation
-
-
-class ServiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Service
-        fields = '__all__'
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = '__all__'
